@@ -1,34 +1,27 @@
-import {config} from '../../config/index';
+import {config} from '../../config';
 
-function withErrorStack(err, stack) {
+function withErrorStack(error, stack) {
   if (config.dev) {
-    return { err, stack };
+    return { error, stack };
   }
-  return err;
+  return error;
 }
 
-function logErrors(err, req, res, next) {
-  console.log(err);
-  next(err);
+function logErrors(error, req, res, next) {
+  console.log(error);
+  next(error);
 }
 
-function errorHandler(err, req, res, next) {
-  //  res.status(500).json({
-  //     message_error:
-  //       err.message || 'Ups... something went wrong, please try in a while.',
-  //   });
+function errorHandler(error, req, res, next) {
 
   res
     .status(500)
     .json(
       withErrorStack(
-        err.message || 'Ups... something went wrong, please try in a while.',
-        err.stack
+        error.message || 'Ups... something went wrong, please try in a while.',
+        error.stack
       )
     );
-
-  // res.status(err.status || 500);
-  // res.json(withErrorStack(err.message, err.stack));
 }
 
 module.exports = {

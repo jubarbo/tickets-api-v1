@@ -13,24 +13,21 @@ export const findAllTickets = async (req, res, next) => {
 
     const { limit, offset } = getPagination(page, size);
     const data = await Ticket.paginate(condition, { offset, limit, title });
-    
-    throw new Error('an error')
-    
+
+    // throw new Error('an error')
+
     res.json({
       totalItems: data.totalDocs,
       tickets: data.docs,
       totalPages: data.totalPages,
-      currentPage: data.page - 1 
+      currentPage: data.page - 1,
     });
-
-
   } catch (err) {
-    next(err)
-   
+    next(err);
   }
 };
 
-export const createTicket = async (req, res) => {
+export const createTicket = async (req, res, next) => {
   if (!req.body.title) {
     return res.status(400).send({
       error_message: 'Title is required',
@@ -49,22 +46,24 @@ export const createTicket = async (req, res) => {
       description: req.body.description,
       done: req.body.done ? req.body.done : false,
     });
+
     const ticketSaved = await newTicket.save();
     res.json(ticketSaved);
   } catch (err) {
-    res.status(500).json({
-      message_error:
-        err.message || 'Ups... something went wrong, please try in a while.',
-    });
+    next(err);
   }
 };
 
-export const findAllDoneTickets = async (req, res) => {
-  const doneTickets = await Ticket.find({ done: true });
-  res.json(doneTickets);
+export const findAllDoneTickets = async (req, res, next) => {
+  try {
+    const doneTickets = await Ticket.find({ done: true });
+    res.json(doneTickets);
+  } catch (err) {
+    next(err);
+  }
 };
 
-export const findOneTicket = async (req, res) => {
+export const findOneTicket = async (req, res, next) => {
   const { id } = req.params;
 
   try {
@@ -77,29 +76,50 @@ export const findOneTicket = async (req, res) => {
 
     res.json(ticket);
   } catch (err) {
-    res.status(500).json({
-      message_error: err.message || `Error retrieving ticket with id: ${id}`,
-    });
+    next(err);
+    // res.status(500).json({
+    //   message_error: err.message || `Error retrieving ticket with id: ${id}`,
+    // });
   }
 };
 
-export const deleteTicket = async (req, res) => {
+export const deleteTicket = async (req, res, next) => {
   const { id } = req.params;
   try {
-    await Ticket.findByIdAndDelete(id);
+    const deletedTicket = await Ticket.findByIdAndDelete(id);
+    if (!deletedTicket) {
+      return res.status(404).json({
+        error_message: `The ticket with id: ${id} does not exists.`,
+      });
+    }
     res.json({
-      message: `Ticket ${id} deleted.`,
+      message: `Ticket with id: ${id} was deleted.`,
     });
   } catch (err) {
-    res.status(500).json({
-      message_error: err.message || `Error deleting ticket with id: ${id}`,
-    });
+    next(err);
+    // res.status(500).json({
+    //   message_error: err.message || `Error deleting ticket with id: ${id}`,
+    // });
   }
 };
 
-export const updateTicket = async (req, res) => {
-  await Ticket.findByIdAndUpdate(req.params.id, req.body);
-  res.json({
-    message: `Ticket ${req.params.id} updated.`,
-  });
+export const updateTicket = async (req, res, next) => {
+ const id = req.params.id;
+  try{
+    const updatedTicket = await Ticket.findByIdAndUpdate(id, req.body);
+    
+    if(!updatedTicket) {
+      return res.status(404).json({
+        error_message: `The ticket with id: ${id} does not exists.`,
+      }); 
+    }
+    res.json({
+      message: `Ticket ${id} updated.`,
+    });
+  }
+  catch(err){
+    next(err)
+  }
+
+ 
 };
