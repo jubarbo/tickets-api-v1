@@ -3,6 +3,7 @@ import express from 'express';
 import ticketsRoutes from './routes/tickets.routes.js';
 import morgan from 'morgan';
 import cors from 'cors';
+import { logErrors, errorHandler } from './utils/middlewares/errorHandlers';
 
 const app = express();
 
@@ -19,5 +20,9 @@ app.get('/', (req, res) => {
 });
 
 app.use('/api/tickets', ticketsRoutes);
+
+//error handlers middlewares
+app.use(logErrors)
+app.use(errorHandler)
 
 export default app;

@@ -1,7 +1,7 @@
 import Ticket from '../models/Ticket';
 import { getPagination } from '../libs/getPagination';
 
-export const findAllTickets = async (req, res) => {
+export const findAllTickets = async (req, res, next) => {
   try {
     const { size, page, title } = req.query;
 
@@ -13,6 +13,9 @@ export const findAllTickets = async (req, res) => {
 
     const { limit, offset } = getPagination(page, size);
     const data = await Ticket.paginate(condition, { offset, limit, title });
+    
+    throw new Error('an error')
+    
     res.json({
       totalItems: data.totalDocs,
       tickets: data.docs,
@@ -22,10 +25,8 @@ export const findAllTickets = async (req, res) => {
 
 
   } catch (err) {
-    res.status(500).json({
-      message_error:
-        err.message || 'Ups... something went wrong, please try in a while.',
-    });
+    next(err)
+   
   }
 };
 
