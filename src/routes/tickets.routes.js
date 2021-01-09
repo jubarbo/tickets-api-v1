@@ -1,9 +1,9 @@
-import {Router} from 'express';
-import * as ticketController from '../controllers/ticket.controller'
+import { Router } from 'express';
+import * as ticketController from '../controllers/ticket.controller';
 
 const router = Router();
 
-router.post('/', ticketController.createTicket)
+router.post('/', ticketController.createTicket);
 
 router.get('/', ticketController.findAllTickets);
 

@@ -3,7 +3,12 @@ import express from 'express';
 import ticketsRoutes from './routes/tickets.routes.js';
 import morgan from 'morgan';
 import cors from 'cors';
-import { logErrors, errorHandler } from './utils/middlewares/errorHandlers';
+import {
+  logErrors,
+  wrapErrors,
+  errorHandler,
+} from './utils/middlewares/errorHandlers';
+import notFoundHandler from './utils/middlewares/notFoundHandler';
 
 const app = express();
 
@@ -18,11 +23,14 @@ app.use(express.urlencoded({ extended: false }));
 app.get('/', (req, res) => {
   res.json({ message: 'Welcome to my app' });
 });
-
 app.use('/api/tickets', ticketsRoutes);
 
+//Catch 404
+app.use(notFoundHandler);
+
 //error handlers middlewares
-app.use(logErrors)
-app.use(errorHandler)
+app.use(logErrors);
+app.use(wrapErrors);
+app.use(errorHandler);
 
 export default app;
